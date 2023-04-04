@@ -2,24 +2,25 @@ using Sericaer.UIBind.Runtime;
 using System;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Sericaer.UIBind.Editor
 {
-    [CustomEditor(typeof(BindContext), true)]
-    public class BindContextEditor : UnityEditor.Editor
+    [CustomEditor(typeof(TextBinder), true)]
+    public class TextBinderEditor : UnityEditor.Editor
     {
-        SerializedProperty Key;
+        SerializedProperty contextBind;
 
         void OnEnable()
         {
-            Key = serializedObject.FindProperty("key");
+            contextBind = serializedObject.FindProperty("contextBind");
         }
 
         public override void OnInspectorGUI()
         {
             this.serializedObject.Update();
 
-            EditorGUILayout.PropertyField(Key);
+            EditorGUILayout.PropertyField(contextBind);
 
             this.serializedObject.ApplyModifiedProperties();
         }

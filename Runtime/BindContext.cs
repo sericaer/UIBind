@@ -1,5 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
+using Sericaer.UIBind.Runtime.Core;
+using System;
 using UnityEngine;
 
 namespace Sericaer.UIBind.Runtime
@@ -7,20 +7,29 @@ namespace Sericaer.UIBind.Runtime
     public class BindContext : MonoBehaviour
     {
         [SerializeField]
-        private string _key;
+        private string key;
 
-        public string Key => _key;
+        private BindCore bindCore;
 
-        // Start is called before the first frame update
-        void Start()
+        public string Key => key;
+
+        void OnEnable()
         {
+            if (key == "" || key == null)
+            {
+                throw new Exception($"Key is empty! {this}");
+            }
 
+            bindCore = this.FindOrAddBindCore();
+            bindCore.AddBindContext(this);
         }
 
-        // Update is called once per frame
-        void Update()
+        void OnDestroy()
         {
-
+            if (!bindCore.isDestroyed)
+            {
+                bindCore.RemoveBindContext(this);
+            }
         }
     }
 }
