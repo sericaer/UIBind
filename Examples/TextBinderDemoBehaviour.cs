@@ -1,4 +1,5 @@
-using Sericaer.UIBind.Runtime.Core;
+using Sericaer.UIBind.Runtime;
+//using Sericaer.UIBind.Runtime.Core;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using UnityEngine;
@@ -10,13 +11,19 @@ namespace Sericaer.UIBind.Examples.TextBinderDemo
         private TestData data1;
         private TestData data2;
 
+        public BindContext bc1;
+        public BindContext bc2;
+
         private void Start()
         {
             data1 = new TestData();
-            BindCore.SetContext("KEY1", data1);
+            //BindCore.SetContext("KEY1", data1);
+            bc1.target = data1;
 
             data2 = new TestData();
-            BindCore.SetContext("KEY2", data2);
+            bc2.target = data2;
+
+            //BindCore.SetContext("KEY2", data2);
         }
 
         int count;
