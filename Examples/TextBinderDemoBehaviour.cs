@@ -18,10 +18,10 @@ namespace Sericaer.UIBind.Examples.TextBinderDemo
         {
             data1 = new TestData();
             //BindCore.SetContext("KEY1", data1);
-            bc1.target = data1;
+            bc1.SetTarget(data1);
 
             data2 = new TestData();
-            bc2.target = data2;
+            bc2.SetTarget(data2);
 
             //BindCore.SetContext("KEY2", data2);
         }

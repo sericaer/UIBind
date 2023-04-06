@@ -15,19 +15,5 @@ namespace Sericaer.UIBind.Runtime
 
             return context;
         }
-
-        //public static BindCore FindOrAddBindCore(this MonoBehaviour binder)
-        //{
-        //    var bindMgr = GameObject.Find(BindCore.ObjName);
-        //    if (bindMgr == null)
-        //    {
-        //        bindMgr = new GameObject();
-        //        bindMgr.name = BindCore.ObjName;
-
-        //        bindMgr.AddComponent<BindCore>();
-        //    }
-
-        //    return bindMgr.GetComponent<BindCore>();
-        //}
     }
 }

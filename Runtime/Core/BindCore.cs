@@ -1,99 +1,99 @@
-//using System;
-//using System.Collections.Generic;
-//using System.ComponentModel;
-//using UnityEngine;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using UnityEngine;
 
-//namespace Sericaer.UIBind.Runtime.Core
-//{
-//    public partial class BindCore : MonoBehaviour
-//    {
-//        public const string ObjName = "BindCore";
+namespace Sericaer.UIBind.Runtime.Core
+{
+    public class BindCore : IDisposable
+    {
+        public INotifyPropertyChanged target
+        {
+            get
+            {
+                return _target;
+            }
+            set
+            {
+                if (_target == value)
+                {
+                    return;
+                }
 
-//        public bool isDestroyed => _isDestroyed;
+                if (_target != null)
+                {
+                    _target.PropertyChanged -= Target_PropertyChanged;
+                }
 
-//        private Dictionary<string, Item> context2Binds = new Dictionary<string, Item>();
-//        private bool _isDestroyed = false;
+                _target = value;
+                if(_target == null)
+                {
+                    return;
+                }
 
-//        public static void SetContext(string key, INotifyPropertyChanged target)
-//        {
-//            var self = GameObject.Find(BindCore.ObjName)?.GetComponent<BindCore>();
-//            if (self == null)
-//            {
-//                throw new Exception("Can not find BindCore!");
-//            }
+                _target.PropertyChanged += Target_PropertyChanged;
 
-//            self.context2Binds[key].target = target;
-//        }
+                if (enable)
+                {
+                    foreach (var binder in binders)
+                    {
+                        foreach (var path in binder.bindPaths)
+                        {
+                            Target_PropertyChanged(_target, new PropertyChangedEventArgs(path));
+                        }
+                    }
+                }
+            }
+        }
 
-//        public void RemoveBind(TextBinder binder)
-//        {
-//            var context = binder.FindContext();
-//            if (context != null)
-//            {
-//                context2Binds[context.Key].RemoveBinder(binder);
-//            }
-//        }
+        private INotifyPropertyChanged _target;
+        private HashSet<IBinder> binders;
+        private bool enable;
 
-//        public void AddBind(TextBinder binder)
-//        {
-//            var context = binder.FindContext();
-//            if (context == null)
-//            {
-//                throw new Exception($"can not find context, when AddBind {binder}");
-//            }
+        internal BindCore()
+        {
+            binders = new HashSet<IBinder>();
+        }
 
-//            if(context2Binds.ContainsKey(context.Key))
-//            {
-//                context2Binds[context.Key].AddBinder(binder);
-//            }
-//        }
+        internal void Disable()
+        {
+            enable = false;
+        }
 
-//        public void AddBindContext(BindContext bindContext)
-//        {
-//            if(context2Binds.ContainsKey(bindContext.Key))
-//            {
-//                if(context2Binds[bindContext.Key].gameObjectID == bindContext.gameObject.GetInstanceID())
-//                {
-//                    return;
-//                }
+        internal void Enable()
+        {
+            enable = true;
+        }
 
-//                throw new Exception($"already have bindContext key {bindContext.Key}");
-//            }
+        internal void AddBinder(IBinder binder)
+        {
+            binders.Add(binder);
+        }
 
-//            var bindGroup = new Item(bindContext);
-//            context2Binds.Add(bindContext.Key, bindGroup);
+        internal void RemoveBinder(IBinder binder)
+        {
+            binders.Remove(binder);
+        }
 
-//            foreach(var binder in bindContext.GetComponentsInChildren<TextBinder>())
-//            {
-//                bindGroup.AddBinder(binder);
-//            }
-//        }
+        private void Target_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (!enable)
+            {
+                return;
+            }
 
-//        public void RemoveBindContext(BindContext bindContext)
-//        {
-//            if (!context2Binds.ContainsKey(bindContext.Key))
-//            {
-//                throw new Exception($"not have bindContext key {bindContext.Key}");
-//            }
+            foreach (var binder in binders)
+            {
+                binder.OnPropertyChanged(e.PropertyName, sender);
+            }
+        }
 
-//            foreach (var binder in bindContext.GetComponentsInChildren<TextBinder>())
-//            {
-//                context2Binds[bindContext.Key].RemoveBinder(binder);
-//            }
-
-//            context2Binds.Remove(bindContext.Key);
-//        }
-
-//        void OnDestroy()
-//        {
-//            _isDestroyed = true;
-
-//            foreach (var group in context2Binds.Values)
-//            {
-//                group.Dispose();
-//            }
-
-//            context2Binds.Clear();
-//        }
-//    }
-//}
+        public void Dispose()
+        {
+            if (_target != null)
+            {
+                _target.PropertyChanged -= Target_PropertyChanged;
+            }
+        }
+    }
+}

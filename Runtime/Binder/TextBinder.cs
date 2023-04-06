@@ -1,22 +1,21 @@
+using Sericaer.UIBind.Runtime.Core;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace Sericaer.UIBind.Runtime
 {
-    public class TextBinder : MonoBehaviour
+    public class TextBinder : MonoBehaviour, IBinder
     {
         [SerializeField]
         private string contextBind;
 
-        //private BindCore bindCore;
-
         public string ContextBind => contextBind;
 
         public Text Text => GetComponent<Text>();
+
         public BindContext bindContext
         {
             get
@@ -32,6 +31,8 @@ namespace Sericaer.UIBind.Runtime
             }
         }
 
+        public IEnumerable<string> bindPaths => new string[] { contextBind };
+
         void OnEnable()
         {
             if (Text == null)
@@ -44,32 +45,21 @@ namespace Sericaer.UIBind.Runtime
                 throw new Exception($"Cannot find BindContext Component in {this} or parent");
             }
 
-
-            bindContext.binders.Add(this);
-
-            //var binders = bindContext.GetComponentsInChildren<TextBinder>();
-
-            //bindCore = GameObject.Find(BindCore.ObjName)?.GetComponent<BindCore>();
-            //if(bindCore != null)
-            //{
-            //    bindCore.AddBind(this);
-            //}
+            bindContext.AddBinder(this);
         }
-
-
 
         void OnDisable()
         {
-            if (bindContext != null)
-            {
-                bindContext.binders.Remove(this);
-            }
-            //if (bindCore != null && !bindCore.isDestroyed)
-            //{
-            //    bindCore.RemoveBind(this);
-            //}
+            bindContext?.AddBinder(this);
         }
 
-
+        public void OnPropertyChanged(string propertyName, object sender)
+        {
+            if (propertyName == ContextBind)
+            {
+                PropertyInfo prop = sender.GetType().GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
+                Text.text = prop.GetValue(sender)?.ToString();
+            }
+        }
     }
 }
