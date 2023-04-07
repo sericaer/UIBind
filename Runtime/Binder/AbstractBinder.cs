@@ -20,7 +20,9 @@ namespace Sericaer.UIBind.Runtime
         [SerializeField]
         public BindItem[] bindItems;
 
-        public (string, MethodInfo)[] property2Method { get; set; }
+        public (string, MethodInfo)[] propertyPath2Updater { get; set; }
+
+        protected Dictionary<object, MethodInfo> propertyKey2Setter { get; set; }
 
         protected TTarget target => GetComponent<TTarget>();
 
@@ -39,10 +41,10 @@ namespace Sericaer.UIBind.Runtime
             }
         }
 
-        void Awake()
+        protected virtual void Awake()
         {
-            var dict = new Dictionary<object, MethodInfo>();
-            foreach(var method in this.GetType().GetMethods(BindingFlags.Public
+            var dictUpdater = new Dictionary<object, MethodInfo>();
+            foreach (var method in this.GetType().GetMethods(BindingFlags.Public
                                                      | BindingFlags.NonPublic
                                                      | BindingFlags.Instance
                                                      | BindingFlags.DeclaredOnly))
@@ -53,13 +55,13 @@ namespace Sericaer.UIBind.Runtime
                     continue;
                 }
 
-                dict.Add(attrib.propertyEnum, method);
+                dictUpdater.Add(attrib.propertyEnum, method);
             }
 
-            property2Method = bindItems.Select(item =>(item.path, dict[item.key])).ToArray();
+            propertyPath2Updater = bindItems.Select(item =>(item.path, dictUpdater[item.key])).ToArray();
         }
 
-        void OnEnable()
+        protected virtual void OnEnable()
         {
             if (target == null)
             {
@@ -74,9 +76,17 @@ namespace Sericaer.UIBind.Runtime
             bindContext.AddBinder(this);
         }
 
-        void OnDisable()
+        protected virtual void OnDisable()
         {
             bindContext?.RemoveBinder(this);
+        }
+
+        protected void UpdateSource(object key, object value)
+        {
+            var item = bindItems.SingleOrDefault(x => x.key.Equals(key));
+            var setter = bindContext?.GetSetter(item.path);
+
+            setter?.Invoke(value);
         }
     }
 }

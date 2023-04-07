@@ -45,5 +45,10 @@ namespace Sericaer.UIBind.Runtime
 
             core.contextData = data;
         }
+
+        internal Action<object> GetSetter(string Path)
+        {
+           return core.GetSetter(Path);
+        }
     }
 }

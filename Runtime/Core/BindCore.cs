@@ -38,7 +38,7 @@ namespace Sericaer.UIBind.Runtime.Core
                 {
                     foreach (var binder in binders)
                     {
-                        foreach (var pair in binder.property2Method)
+                        foreach (var pair in binder.propertyPath2Updater)
                         {
                             Target_PropertyChanged(_contextData, new PropertyChangedEventArgs(pair.Item1));
                         }
@@ -70,7 +70,7 @@ namespace Sericaer.UIBind.Runtime.Core
         {
             if (binders.Add(binder) && _contextData != null)
             {
-                foreach (var pair in binder.property2Method)
+                foreach (var pair in binder.propertyPath2Updater)
                 {
                     Target_PropertyChanged(_contextData, new PropertyChangedEventArgs(pair.Item1));
                 }
@@ -91,7 +91,7 @@ namespace Sericaer.UIBind.Runtime.Core
 
             foreach (var binder in binders)
             {
-                foreach(var pair in binder.property2Method)
+                foreach(var pair in binder.propertyPath2Updater)
                 {
                     if(pair.property == e.PropertyName)
                     {
@@ -125,6 +125,16 @@ namespace Sericaer.UIBind.Runtime.Core
             {
                 _contextData.PropertyChanged -= Target_PropertyChanged;
             }
+        }
+
+        internal Action<object> GetSetter(string path)
+        {
+            PropertyInfo property = contextData.GetType().GetProperty(path);
+
+            return (object value) =>
+            {
+                property.GetSetMethod().Invoke(contextData, new object[] { value });
+            };
         }
     }
 }
