@@ -9,11 +9,11 @@ namespace Sericaer.UIBind.Runtime
 {
     public class BindContext : MonoBehaviour
     {
-        private BindCore core;
+        private BindCore core { get; } = new BindCore();
 
-        void Awake()
+        void OnDestroy()
         {
-            core = new BindCore();
+            core.Dispose();
         }
 
         void OnEnable()
@@ -36,9 +36,14 @@ namespace Sericaer.UIBind.Runtime
             core.RemoveBinder(binder);
         }
 
-        internal void SetTarget(INotifyPropertyChanged target)
+        internal void SetContextData(INotifyPropertyChanged data)
         {
-            core.target = target;
+            if(!isActiveAndEnabled)
+            {
+                throw new Exception("can not set context data to disabled BindContext");
+            }
+
+            core.contextData = data;
         }
     }
 }

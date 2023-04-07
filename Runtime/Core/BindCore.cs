@@ -1,52 +1,53 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Reflection;
 using UnityEngine;
 
 namespace Sericaer.UIBind.Runtime.Core
 {
     public class BindCore : IDisposable
     {
-        public INotifyPropertyChanged target
+        public INotifyPropertyChanged contextData
         {
             get
             {
-                return _target;
+                return _contextData;
             }
             set
             {
-                if (_target == value)
+                if (_contextData == value)
                 {
                     return;
                 }
 
-                if (_target != null)
+                if (_contextData != null)
                 {
-                    _target.PropertyChanged -= Target_PropertyChanged;
+                    _contextData.PropertyChanged -= Target_PropertyChanged;
                 }
 
-                _target = value;
-                if(_target == null)
+                _contextData = value;
+                if(_contextData == null)
                 {
                     return;
                 }
 
-                _target.PropertyChanged += Target_PropertyChanged;
+                _contextData.PropertyChanged += Target_PropertyChanged;
 
                 if (enable)
                 {
                     foreach (var binder in binders)
                     {
-                        foreach (var path in binder.bindPaths)
+                        foreach (var pair in binder.property2Method)
                         {
-                            Target_PropertyChanged(_target, new PropertyChangedEventArgs(path));
+                            Target_PropertyChanged(_contextData, new PropertyChangedEventArgs(pair.Item1));
                         }
                     }
                 }
             }
         }
 
-        private INotifyPropertyChanged _target;
+        private INotifyPropertyChanged _contextData;
         private HashSet<IBinder> binders;
         private bool enable;
 
@@ -67,7 +68,13 @@ namespace Sericaer.UIBind.Runtime.Core
 
         internal void AddBinder(IBinder binder)
         {
-            binders.Add(binder);
+            if (binders.Add(binder) && _contextData != null)
+            {
+                foreach (var pair in binder.property2Method)
+                {
+                    Target_PropertyChanged(_contextData, new PropertyChangedEventArgs(pair.Item1));
+                }
+            }
         }
 
         internal void RemoveBinder(IBinder binder)
@@ -84,15 +91,39 @@ namespace Sericaer.UIBind.Runtime.Core
 
             foreach (var binder in binders)
             {
-                binder.OnPropertyChanged(e.PropertyName, sender);
+                foreach(var pair in binder.property2Method)
+                {
+                    if(pair.property == e.PropertyName)
+                    {
+                        var prop = sender.GetType().GetProperty(e.PropertyName, BindingFlags.Public | BindingFlags.Instance);
+                        var parameters = pair.method.GetParameters();
+                        if(parameters.Length != 1)
+                        {
+                            throw new Exception();
+                        }
+
+                        if(parameters[0].ParameterType == prop.PropertyType)
+                        {
+                            pair.method.Invoke(binder, new object[] { prop.GetValue(sender) });
+                        }
+                        else if(parameters[0].ParameterType == typeof(string))
+                        {
+                            pair.method.Invoke(binder, new object[] { prop.GetValue(sender).ToString() });
+                        }
+                        else
+                        {
+                            throw new Exception();
+                        }
+                    }
+                }
             }
         }
 
         public void Dispose()
         {
-            if (_target != null)
+            if (_contextData != null)
             {
-                _target.PropertyChanged -= Target_PropertyChanged;
+                _contextData.PropertyChanged -= Target_PropertyChanged;
             }
         }
     }

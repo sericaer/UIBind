@@ -1,10 +1,10 @@
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace Sericaer.UIBind.Runtime.Core
 {
     public interface IBinder
     {
-        IEnumerable<string> bindPaths { get; }
-        void OnPropertyChanged(string propertyName, object sender);
+        (string property, MethodInfo method)[] property2Method { get; set; }
     }
 }

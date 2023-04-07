@@ -17,11 +17,11 @@ namespace Sericaer.UIBind.Examples.TextBinderDemo
         private void Start()
         {
             data1 = new TestData();
-            //BindCore.SetContext("KEY1", data1);
-            bc1.SetTarget(data1);
-
             data2 = new TestData();
-            bc2.SetTarget(data2);
+
+            //BindCore.SetContext("KEY1", data1);
+            bc1.SetContextData(data1);
+            bc2.SetContextData(data2);
 
             //BindCore.SetContext("KEY2", data2);
         }
@@ -35,7 +35,9 @@ namespace Sericaer.UIBind.Examples.TextBinderDemo
                 data1.strValue = $"DATA1 is {data1.intValue}";
 
                 data2.intValue = data1.intValue * 2;
-                data2.strValue = $"DATA1 is {data2.intValue}";
+                data2.strValue = $"DATA2 is {data2.intValue}";
+
+                data2.strFontSize = (data2.strFontSize + 1) % 20;
             }
 
             count++;
@@ -62,6 +64,22 @@ namespace Sericaer.UIBind.Examples.TextBinderDemo
             }
         }
 
+        public int strFontSize
+        {
+            get
+            {
+                return _strFontSize;
+            }
+            set
+            {
+                if (_strFontSize != value)
+                {
+                    _strFontSize = value;
+                    NotifyPropertyChanged();
+                }
+            }
+        }
+
         public string strValue
         {
             get
@@ -79,6 +97,7 @@ namespace Sericaer.UIBind.Examples.TextBinderDemo
         }
 
         private int _intValue;
+        private int _strFontSize = 10;
         private string _strValue;
 
         private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
