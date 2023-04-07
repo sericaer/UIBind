@@ -41,24 +41,11 @@ namespace Sericaer.UIBind.Runtime
             }
         }
 
+        public IReadOnlyDictionary<object, string> bindKey2Path { get; private set; }
+
         protected virtual void Awake()
         {
-            var dictUpdater = new Dictionary<object, MethodInfo>();
-            foreach (var method in this.GetType().GetMethods(BindingFlags.Public
-                                                     | BindingFlags.NonPublic
-                                                     | BindingFlags.Instance
-                                                     | BindingFlags.DeclaredOnly))
-            {
-                var attrib = method.GetCustomAttribute<PropertyChangedAttribute>();
-                if(attrib == null)
-                {
-                    continue;
-                }
-
-                dictUpdater.Add(attrib.propertyEnum, method);
-            }
-
-            propertyPath2Updater = bindItems.Select(item =>(item.path, dictUpdater[item.key])).ToArray();
+            bindKey2Path = bindItems.ToDictionary(p => (object)p.key, p => p.path);
         }
 
         protected virtual void OnEnable()
@@ -83,10 +70,7 @@ namespace Sericaer.UIBind.Runtime
 
         protected void UpdateSource(object key, object value)
         {
-            var item = bindItems.SingleOrDefault(x => x.key.Equals(key));
-            var setter = bindContext?.GetSetter(item.path);
-
-            setter?.Invoke(value);
+            bindContext?.UpdateSource(key, value);
         }
     }
 }

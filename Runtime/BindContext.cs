@@ -46,9 +46,9 @@ namespace Sericaer.UIBind.Runtime
             core.contextData = data;
         }
 
-        internal Action<object> GetSetter(string Path)
+        internal void UpdateSource(object key, object value)
         {
-           return core.GetSetter(Path);
+            core.UpdateSource(key, value);
         }
     }
 }

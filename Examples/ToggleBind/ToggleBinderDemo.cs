@@ -16,6 +16,8 @@ public class ToggleBinderDemo : MonoBehaviour
     void Start()
     {
         data1 = new TestData();
+        data1.overturnValue = true;
+
         data2 = new TestData();
 
         bc1.SetContextData(data1);
