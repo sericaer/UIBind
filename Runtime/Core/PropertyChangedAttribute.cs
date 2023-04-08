@@ -8,15 +8,15 @@ namespace Sericaer.UIBind.Runtime.Core
         TwoWay
     }
 
-    public class PropertyChangedAttribute : Attribute
+    public class BindWayAttribute : Attribute
     {
-        public readonly object propertyEnum;
         public readonly BindWay bindWay;
+        public readonly string updateTargetMethod;
 
-        public PropertyChangedAttribute(object propertyEnum, BindWay bindWay = BindWay.OneWay)
+        public BindWayAttribute(string updateTargetMethod,  BindWay bindWay = BindWay.OneWay)
         {
-            this.propertyEnum = propertyEnum;
             this.bindWay = bindWay;
+            this.updateTargetMethod = updateTargetMethod;
         }
     }
 }

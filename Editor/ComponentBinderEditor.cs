@@ -2,6 +2,7 @@ using UnityEditor;
 
 namespace Sericaer.UIBind.Editor
 {
+#if UNITY_EDITOR
     public class ComponentBinderEditor : UnityEditor.Editor
     {
         SerializedProperty bindItems;
@@ -20,4 +21,5 @@ namespace Sericaer.UIBind.Editor
             this.serializedObject.ApplyModifiedProperties();
         }
     }
+#endif
 }

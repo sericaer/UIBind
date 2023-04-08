@@ -14,13 +14,17 @@ namespace Sericaer.UIBind.Runtime.Core
         {
             public readonly object key;
             public readonly string bindPath;
-
+            public readonly BindWay bindWay;
+            
             private readonly IBinder target;
             private INotifyPropertyChanged source;
 
             private readonly MethodInfo updateTargetMethod;
 
-            private PropertyInfo sourceProperty;
+            private MethodInfo sourceGetter;
+            private MethodInfo sourceSetter;
+
+            private Converter converter;
 
             public Element(IBinder target, object key, string bindPath)
             {
@@ -28,31 +32,47 @@ namespace Sericaer.UIBind.Runtime.Core
                 this.bindPath = bindPath;
                 this.target = target;
 
-                updateTargetMethod = target.GetType().GetMethods(BindingFlags.Public
+                var enumType = key.GetType();
+                var memberInfos = enumType.GetMember(key.ToString());
+                var enumValueMemberInfo = memberInfos.FirstOrDefault(m => m.DeclaringType == enumType);
+                var bindWayAttribute = (BindWayAttribute)enumValueMemberInfo.GetCustomAttribute(typeof(BindWayAttribute), false);
+                
+                bindWay = bindWayAttribute.bindWay;
+                updateTargetMethod = target.GetType().GetMethod(bindWayAttribute.updateTargetMethod, BindingFlags.Public
                                                          | BindingFlags.NonPublic
                                                          | BindingFlags.Instance
-                                                         | BindingFlags.DeclaredOnly)
-                    .SingleOrDefault(method =>
-                    {
-                        var attrib = method.GetCustomAttribute<PropertyChangedAttribute>();
-                        return attrib != null && attrib.propertyEnum.Equals(key);
-                    });
+                                                         | BindingFlags.DeclaredOnly);
             }
 
             public void UpdateTarget(object currValue)
             {
-                updateTargetMethod.Invoke(target, new object[] { sourceProperty.GetValue(currValue) });
+                updateTargetMethod.Invoke(target, new object[] { converter.ConvertSourceToTargetValue(sourceGetter.Invoke(currValue, null)) });
             }
 
             public void UpdateSource(object currValue)
             {
-                sourceProperty.SetValue(source, currValue);
+                sourceSetter.Invoke(source, new object[] { currValue });
             }
 
             public void AssocSource(INotifyPropertyChanged source)
             {
                 this.source = source;
-                sourceProperty = source.GetType().GetProperty(bindPath);
+
+                var property = source.GetType().GetProperty(bindPath);
+                if(property == null)
+                {
+                    throw new Exception($"Can not find bindPath '{bindPath}' in {source.GetType()}");
+                }
+
+                converter = new Converter(property.PropertyType, updateTargetMethod.GetParameters().First().ParameterType);
+
+                sourceGetter = property.GetGetMethod();
+                sourceSetter = property.GetSetMethod();
+
+                if(bindWay == BindWay.TwoWay && sourceSetter == null)
+                {
+                    throw new Exception();
+                }
             }
 
             public void DisassocSource(INotifyPropertyChanged source)
@@ -63,7 +83,43 @@ namespace Sericaer.UIBind.Runtime.Core
                 }
 
                 this.source = null;
-                sourceProperty = null;
+
+                sourceGetter = null;
+                sourceSetter = null;
+
+                converter = null;
+            }
+        }
+    }
+
+    public class Converter
+    {
+        private readonly Type targetValueType;
+        private readonly Type sourceType;
+
+        public Converter(Type sourceType, Type targetValueType)
+        {
+            this.sourceType = sourceType;
+            this.targetValueType = targetValueType;
+        }
+
+        internal object ConvertSourceToTargetValue(object sourceValue)
+        {
+            if(sourceValue == null)
+            {
+                return null;
+            }
+            else if(sourceValue.GetType() == targetValueType)
+            {
+                return sourceValue;
+            }
+            else if (targetValueType == typeof(string))
+            {
+                return sourceValue.ToString();
+            }
+            else
+            {
+                throw new Exception();
             }
         }
     }

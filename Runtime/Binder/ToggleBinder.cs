@@ -8,10 +8,10 @@ namespace Sericaer.UIBind.Runtime
     {
         public enum PropertyEnum
         {
+            [BindWay(nameof(OnValueChanged), BindWay.TwoWay)]
             Value,
         }
 
-        [PropertyChanged(PropertyEnum.Value, BindWay.TwoWay)]
         void OnValueChanged(bool currValue)
         {
             target.isOn = currValue;

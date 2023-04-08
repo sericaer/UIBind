@@ -7,17 +7,18 @@ namespace Sericaer.UIBind.Runtime
     {
         public enum PropertyEnum
         {
+            [BindWay(nameof(OnValueChanged), BindWay.OneWay)]
             Value,
+
+            [BindWay(nameof(OnFontSizeChanged), BindWay.OneWay)]
             FontSize,
         }
         
-        [PropertyChanged(PropertyEnum.Value)]
         void OnValueChanged(string currValue)
         {
             target.text = currValue;
         }
 
-        [PropertyChanged(PropertyEnum.FontSize)]
         void OnFontSizeChanged(int currSize)
         {
             target.fontSize = currSize;

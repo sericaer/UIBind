@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace Sericaer.UIBind.Editor
 {
+#if UNITY_EDITOR
     [CustomEditor(typeof(BindContext), true)]
     public class BindContextEditor : UnityEditor.Editor
     {
@@ -24,4 +25,5 @@ namespace Sericaer.UIBind.Editor
         //    this.serializedObject.ApplyModifiedProperties();
         //}
     }
+#endif
 }
