@@ -56,6 +56,11 @@ namespace Sericaer.UIBind.Runtime
             core.contextData = data;
         }
 
+        internal object GetContextData()
+        {
+            return core.contextData;
+        }
+
         internal void UpdateSource(object key, object value)
         {
             core.UpdateSource(key, value);
