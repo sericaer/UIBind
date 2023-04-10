@@ -15,7 +15,9 @@ namespace Sericaer.UIBind.Runtime.Core
             public readonly object key;
             public readonly string bindPath;
             public readonly BindWay bindWay;
-            
+
+            public bool isEnable { get; set; } = true;
+
             private readonly IBinder target;
             private INotifyPropertyChanged source;
 

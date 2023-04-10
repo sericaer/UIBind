@@ -28,12 +28,22 @@ namespace Sericaer.UIBind.Runtime
 
         internal void AddBinder(IBinder binder)
         {
-            core.AddBinder(binder);
+            core.OnAddBinder(binder);
         }
 
-        internal void RemoveBinder(IBinder binder)
+        internal void OnDisableBinder(IBinder binder)
         {
-            core.RemoveBinder(binder);
+            core.OnDisableBinder(binder);
+        }
+
+        internal void OnEnableBinder(IBinder binder)
+        {
+            core.OnEnableBinder(binder);
+        }
+
+        internal void OnDestroyBinder(IBinder binder)
+        {
+            core.OnRemoveBinder(binder);
         }
 
         internal void SetContextData(INotifyPropertyChanged data)
@@ -50,5 +60,6 @@ namespace Sericaer.UIBind.Runtime
         {
             core.UpdateSource(key, value);
         }
+
     }
 }

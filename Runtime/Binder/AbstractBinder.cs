@@ -60,12 +60,17 @@ namespace Sericaer.UIBind.Runtime
                 throw new Exception($"Cannot find BindContext Component in {this} or parent");
             }
 
-            bindContext.AddBinder(this);
+            bindContext.OnEnableBinder(this);
         }
 
         protected virtual void OnDisable()
         {
-            bindContext?.RemoveBinder(this);
+            bindContext?.OnDisableBinder(this);
+        }
+
+        protected virtual void OnDestroy()
+        {
+            bindContext?.OnDestroyBinder(this);
         }
 
         protected void UpdateSource(object key, object value)
