@@ -1,5 +1,6 @@
 using Sericaer.UIBind.Runtime.Core;
 using System;
+using System.ComponentModel;
 using UnityEngine.UI;
 
 namespace Sericaer.UIBind.Runtime

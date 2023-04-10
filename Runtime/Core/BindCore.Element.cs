@@ -113,6 +113,10 @@ namespace Sericaer.UIBind.Runtime.Core
             {
                 return sourceValue;
             }
+            else if(targetValueType.IsAssignableFrom(sourceValue.GetType()))
+            {
+                return sourceValue;
+            }
             else if (targetValueType == typeof(string))
             {
                 return sourceValue.ToString();
