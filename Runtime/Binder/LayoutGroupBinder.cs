@@ -30,6 +30,14 @@ namespace Sericaer.UIBind.Runtime
 
             this.obsCollection = obsCollection;
             obsCollection.CollectionChanged += OnCollectionChanged;
+
+            var oldItems = GetComponentsInChildren<BindContext>()
+                .Where(x => x != itemTemplate)
+                .ToArray();
+
+            OnItemRemove(oldItems.Select(x => x.GetContextData()).ToList());
+
+            OnItemAdd(obsCollection);
         }
 
         private void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
