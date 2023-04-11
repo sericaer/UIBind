@@ -36,7 +36,7 @@ namespace Sericaer.UIBind.Runtime
                     return context;
                 }
 
-                context = GetComponentInParent<BindContext>();
+                context = GetComponentInParent<BindContext>(true);
                 return context;
             }
         }
