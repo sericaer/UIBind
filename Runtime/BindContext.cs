@@ -4,15 +4,20 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Sericaer.UIBind.Runtime
 {
     public class BindContext : MonoBehaviour
     {
+        public UnityEvent OnDestroyEvent;
+
         private BindCore core { get; } = new BindCore();
 
         void OnDestroy()
         {
+            OnDestroyEvent?.Invoke();
+
             core.Dispose();
         }
 
